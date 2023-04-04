@@ -1,0 +1,12 @@
+.env
+airflow/.env
+__pycache__
+
+# venv
+streamlit/streamlit_venv
+
+# jv
+JV
+Notes.txt
+jv_scrap.py
+/airflow/logs/
