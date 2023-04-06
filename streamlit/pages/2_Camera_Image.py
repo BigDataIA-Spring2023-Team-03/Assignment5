@@ -2,6 +2,7 @@ import streamlit as st
 import boto3
 from datetime import datetime
 from decouple import config
+import ClothesReviewHub
 
 # AWS KEYS
 aws_access_key_id = config('aws_access_key_id')
@@ -22,8 +23,6 @@ s3_client = boto3.client(
 #######################################################
 st.title('Image from Camera')
 
-s3_files_2 = []
-
 image_title = st.text_input('Image Title', '')
 picture = st.camera_input("Take a picture:")
 
@@ -32,7 +31,7 @@ if picture and image_title != '':
     filename = image_title + '_' + datetime.now().strftime("%d_%m_%y") + '.jpg'
 
     # Upload the file to the S3 bucket if it doesn't already exist
-    if filename not in s3_files_2:
+    if filename not in ClothesReviewHub.s3_files:
         # with open (filename,'wb') as file:
         #     file.write(picture.getbuffer())
         s3_client.upload_fileobj(picture, s3_bucket_name, 'Input/' + filename)

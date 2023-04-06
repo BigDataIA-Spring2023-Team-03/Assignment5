@@ -91,6 +91,14 @@ def detect_logos(file):
 
 
 #########################################################################
+st.title('ClothesReviewHub')
+st.subheader('Three Upload Options: Take a Picture, Select Existing from S3, Upload an Image')
+
+# Take Picture Option
+link = 'http://localhost:8501/Camera_Image'
+
+st.markdown(f'To take a picture using your device, use this link: <a href={link}>Take Picture</a>', unsafe_allow_html=True)
+
 # Create a dropdown to select an existing file from the S3 bucket
 s3_objects = s3_client.list_objects_v2(Bucket=s3_bucket_name, Prefix='Input/')
 s3_files = [obj["Key"] for obj in s3_objects.get("Contents", []) if not obj['Key'] == 'Input/']
