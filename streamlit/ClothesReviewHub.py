@@ -27,23 +27,22 @@ s3_client = boto3.client(
 
 ##########################################################################
 # Goog Cloud Vision APIs
-# Detect Labels
-def detect_labels(file):
+# Detect Labels and Logos
+def detect_labels_logos(file):
     """Detects labels in the file."""
     client = vision.ImageAnnotatorClient(credentials=credentials)
 
     # with io.open(file, 'rb') as image_file:
     #     content = image_file.read()
     content = file.read()
-    
+    st.write(type(content))
     image = vision.Image(content=content)
-    # st.write(type(image))
+    st.write(type(image))
+
+    # Labels
     response = client.label_detection(image=image)
     labels = response.label_annotations
     print('Labels:')
-
-    # Close opened file
-    file.close()
 
     label_list = []
     for label in labels:
@@ -55,26 +54,11 @@ def detect_labels(file):
             '{}\nFor more info on error messages, check: '
             'https://cloud.google.com/apis/design/errors'.format(
                 response.error.message))
-    
-    return label_list
 
-# Detect Logos
-def detect_logos(file):
-    """Detects logos in the file."""
-    client = vision.ImageAnnotatorClient(credentials=credentials)
-
-    # with io.open(file, 'rb') as image_file:
-    #     content = image_file.read()
-    content = file.read()
-
-    image = vision.Image(content=content)
-    # st.write(type(image))
+    # Logos
     response = client.logo_detection(image=image)
     logos = response.logo_annotations
     print('Logos:')
-
-    # Close opened file
-    file.close()
 
     logo_list = []
     for logo in logos:
@@ -86,8 +70,8 @@ def detect_logos(file):
             '{}\nFor more info on error messages, check: '
             'https://cloud.google.com/apis/design/errors'.format(
                 response.error.message))
-
-    return logo_list
+    
+    return label_list, logo_list
 
 
 #########################################################################
@@ -156,16 +140,11 @@ else:
         response = s3_client.get_object(Bucket=s3_bucket_name, Key='Input/' + filename)
         image_data = response["Body"]
 
-        # Detect labels
-        label_list = detect_labels(image_data)
+        # Detect labels and Logos
+        label_list, logo_list = detect_labels_logos(image_data)
 
         st.write(f'Label List: {label_list}')
-
-        # Detect labels
-        logo_list = detect_logos(image_data)
-
         st.write(f'Logo List: {logo_list}')
-
 
         # """Detects labels in the file."""
         # client = vision.ImageAnnotatorClient(credentials=credentials)
