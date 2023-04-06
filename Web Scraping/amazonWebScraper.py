@@ -1,34 +1,50 @@
-import requests
-from bs4 import BeautifulSoup
+from serpapi import GoogleSearch
 
-search_term = 'nike sports shoes'
-search_terms = search_term.split(" ")
-search_string = "+".join(search_terms)
-print(search_string)
-
-url = f'https://www.amazon.com/s?k={search_string}'
-headers = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36"
+query = "Black Tshirt Men"
+params = {
+  "engine": "walmart",
+  "query": query,
+  "api_key": "<Serp api key>",
+  "sort": "best_seller"
 }
 
-response = requests.get(url, headers=headers)
-html_content = response.content
+search = GoogleSearch(params)
+results = search.get_dict()
+organic_results = results["organic_results"]
 
-soup = BeautifulSoup(html_content, 'lxml')
+top3 = organic_results[:3]
 
-products = soup.find_all('div', {'data-component-type': 's-search-result'})
-print("products: ",products)
-for product in products:
-    # Get the product title
-    title = product.find('h2').text.strip()
+top3_dict = {}
 
-    # Get the product link
-    link = product.find('a', {'class': 'a-link-normal'})['href']
+index = 0
+for i in top3:
+  top3_dict[index]= {}
+  top3_dict[index]['us_item_id'] = i['us_item_id']
+  top3_dict[index]['title'] = i['title']
+  top3_dict[index]['thumbnail'] = i['thumbnail']
+  index = index + 1
 
-    # Get the product image
-    image = product.find('img')['src']
+for i in top3_dict.values():
+  params = {
+    "engine": "walmart_product_reviews",
+    "product_id": i['us_item_id'],
+    "api_key": "9661f96f63bd4ca12a877d9ea0d9597fb800a41f432d1d77895032f340352939",
+    "sort": "relevancy"
+  }
 
-    # Print the product information
-    print(title)
-    print(link)
-    print(image)
+  search = GoogleSearch(params)
+  results = search.get_dict()
+
+  print(results['overall_rating'])
+  reviews = []
+  for i in results['reviews']:
+    text = {}
+    if 'title' in i:
+      text['title'] = i['title']
+    text['review'] = i['text']
+    reviews.append(text)
+
+  print(reviews)
+
+
+
