@@ -35,9 +35,9 @@ def detect_labels_logos(file):
     # with io.open(file, 'rb') as image_file:
     #     content = image_file.read()
     content = file.read()
-    st.write(type(content))
+    # st.write(type(content))
     image = vision.Image(content=content)
-    st.write(type(image))
+    # st.write(type(image))
 
     # Labels
     response = client.label_detection(image=image)
@@ -146,8 +146,27 @@ else:
         st.write(f'Label List: {label_list}')
         st.write(f'Logo List: {logo_list}')
 
-        # """Detects labels in the file."""
-        # client = vision.ImageAnnotatorClient(credentials=credentials)
+
+        # Search for Similar Products
+        st.subheader('Select Marketplace to Search for Similar Products:')
+        walmart = st.checkbox('Walmart')
+        amazon = st.checkbox('Amazon - (Deprecated)')
+
+        if walmart:
+            # TODO
+            st.write('Link to result, image')
+
+            # Learn More
+            st.write('Want to Learn More? Check below to generate a summary of product reviews:')
+            learn_more = st.checkbox('Learn More?')
+            # Generate Summary of Reviews
+            if learn_more:
+                # TODO: Generate Summary of reviews
+                st.subheader('Summary of Reviews')
+
+
+
+
 
         # # TESTING 
         # path = 'Example_Images/patagonia_fleece.jpg'
