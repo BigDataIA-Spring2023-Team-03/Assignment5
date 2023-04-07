@@ -1,2 +1,7 @@
 https://cloud.google.com/vision/docs/samples/vision-logo-detection
 
+ssh -i ec2_instance_keypair.pem ec2-user@ec2-52-202-105-109.compute-1.amazonaws.com
+
+ssh -i ec2_instance_keypair.pem ec2-user@ec2-44-214-57-19.compute-1.amazonaws.com
+
+http://44.214.57.19:8501/

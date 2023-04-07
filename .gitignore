@@ -11,3 +11,6 @@ JV
 Notes.txt
 jv_scrap.py
 /airflow/logs/
+
+ec2_instance_keypair.pem
+Ideas_Details.txt
