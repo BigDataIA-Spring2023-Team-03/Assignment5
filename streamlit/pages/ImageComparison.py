@@ -48,7 +48,7 @@ target_files = st.file_uploader("Choose images", type=["jpg", "jpeg", "png"])
 # Displaying the uploaded target images
 if target_files is not None:
     image = Image.open(target_files)
-    st.image(image, caption="Uploaded Image", width=200)
+    # st.image(image, caption="Uploaded Image", width=200)
     with tempfile.NamedTemporaryFile(delete=False, suffix='.png') as tmp_file:
         tmp_file.write(target_files.getbuffer())
         file_path = tmp_file.name
@@ -63,7 +63,9 @@ if source_path is not None and target_path is not None:
     score = compare_score(source_path, target_path)
     st.write('Camparison Score:', score)
 
-
+if target_files is not None:
+    image = Image.open(target_files)
+    st.image(image, caption="Uploaded Image", width=200)
 
 
 # ## Code for uploading multiple Images
