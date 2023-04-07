@@ -9,6 +9,7 @@ import boto3
 from amazonWebScraper import WalmartReviews
 from ProductBuy import should_buy_product
 from Logging.aws_logging import write_logs
+import json
 
 # AWS KEYS
 aws_access_key_id = config('aws_access_key_id')
@@ -172,6 +173,14 @@ else:
                             'Products': products
                             }
             write_logs(str(log_results))
+
+            # Upload JSON Results file to S3
+            # Convert the dictionary to JSON
+            json_str = json.dumps(log_results)
+            # Upload the JSON file to S3
+            s3_client.put_object(Bucket=s3_bucket_name, Key='Results/' + filename.split('.')[0] + '.json', Body=json_str)
+
+            st.write(f"{filename.split('.')[0]}.json uploaded to S3")
 
             # Learn More
             st.write('Want to Learn More? Check below to generate a summary of product reviews:')
