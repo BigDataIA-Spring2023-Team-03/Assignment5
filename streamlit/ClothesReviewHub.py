@@ -1,11 +1,11 @@
 import streamlit as st
 from PIL import Image
 from google.cloud import vision
-import io
-import os
 from google.oauth2 import service_account
 from decouple import config
 import boto3
+import openai
+import io
 from amazonWebScraper import WalmartReviews
 from ProductBuy import should_buy_product
 from Logging.aws_logging import write_logs
@@ -87,18 +87,98 @@ s3_objects = s3_client.list_objects_v2(Bucket=s3_bucket_name, Prefix='Input/')
 s3_files = [obj["Key"] for obj in s3_objects.get("Contents", []) if not obj['Key'] == 'Input/']
 # Get Necessary file
 s3_files = [file.split('/')[1] for file in s3_files if file[-1] != '/' and file.split('.')[1] in ('jpg')]
+selected_file = "None"
+selected_image = None
+if len(s3_files) == 0:
+    st.write("No files found in S3 bucket.")
+    selected_file = None
+else:
+    selected_file = st.selectbox("Select an existing file from S3", ["None"] + s3_files)
+    if not selected_file == "None":
+        try:
+            obj = s3_client.get_object(Bucket=s3_bucket_name, Key="Input/" + selected_file)
+            file_content = obj['Body'].read()
+            selected_image = Image.open(io.BytesIO(file_content))
+            st.image(selected_image, caption=selected_file, use_column_width=True)
+        except:
+            st.error("File not found")
+    else:
+        st.write("No File Selected")
 
-selected_file = st.selectbox("Select an existing file from S3", ["None"] + s3_files)
-
-# IMAGE SELECTION
-# Upload image
 # TODO: max size is 4MB
 uploaded_file = st.file_uploader("Choose an image (jpg):", type="jpg")
 
 # Check if both an uploaded file and an S3 file were selected
 if uploaded_file and selected_file != "None":
     st.write("Error: please select only one option")
+
 else:
+    st.write(type(uploaded_file))
+    st.write(type(selected_image))
+
+    if selected_image is not None:
+        # st.image(selected_image, caption="Uploaded Image", use_column_width=True)
+        # st.write(selected_file)
+        response = s3_client.get_object(Bucket=s3_bucket_name, Key='Input/' + selected_file)
+        image_data = response["Body"]
+        label_list, logo_list = detect_labels_logos(image_data)
+
+        st.write(f'Label List: {label_list}')
+
+        label_query = ""
+        for i in label_list:
+            label_query += i
+            label_query += " "
+
+        st.write("")
+        st.write(label_query)
+        st.write(f'Logo List: {logo_list}')
+
+        # Search for Similar Products
+        st.subheader('Select Marketplace to Search for Similar Products:')
+        walmart = st.checkbox('Get Walmart Reviews')
+        # amazon = st.checkbox('Amazon - (Deprecated)')
+
+        if walmart:
+            # TODO
+            products, reviews = WalmartReviews(label_query)
+            # st.write(reviews)
+            for j,i in enumerate(products):
+                st.image(i, width=300)
+
+
+                # Learn More
+                st.write('Want to Learn More? Check below to generate a summary of product reviews:')
+                learn_more = st.checkbox('Learn More?', key = j)
+                # Generate Summary of Reviews
+                if learn_more:
+                    all_reviews = ""
+                    # TODO: Generate Summary of reviews
+                    st.title('Summary of Reviews')
+                    for item in reviews:
+                        # check if the 'title' field exists in the current item
+                        st.text("")
+                        # st.write(item)
+                        summary_prompt = "Summarize the below reviews into 2-3 sentences and suggest whether a user should buy the product:"
+
+                        completion = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": summary_prompt + str(item)}],
+                            temperature=0.7
+                        )
+
+                        chat_output = completion.choices[0].message.content.strip()
+                        st.write(chat_output)
+                        # if 'title' in item:
+                        #     st.subheader(item['title'])
+                        # # display the 'review' field
+                        # st.write(item['review'])
+                        # all_reviews += item['review']
+                    #
+                    # shoud_buy = st.checkbox('Should I buy this product?')
+                    # if shoud_buy:
+                    #     buy_decision = should_buy_product(all_reviews)
+                    #     st.write(buy_decision)
     # Check if an uploaded file was selected
     if uploaded_file is not None:
         # Upload to S3
@@ -107,6 +187,9 @@ else:
             st.stop()
         # Get the file name and size
         filename = uploaded_file.name
+        # filename = obj.get('ResponseMetadata').get('HTTPHeaders').get('x-amz-meta-filename')
+        # filesize = obj.get('ResponseMetadata').get('HTTPHeaders').get('ContentLength')
+
         # if not filename == st.session_state.file_name:
         #     st.session_state.transcription_generated = False
         #     st.session_state.transcript = ''

@@ -42,7 +42,7 @@ def WalmartReviews(query):
 
     index = index + 1
     
-
+  reviews =[]
   for i in top3_dict.values():
     params = {
       "engine": "walmart_product_reviews",
@@ -55,16 +55,15 @@ def WalmartReviews(query):
     results = search.get_dict()
 
     print(results['overall_rating'])
-    reviews = []
+    temp = []
     for i in results['reviews']:
       text = {}
-      if 'title' in i:
+      if 'title' in i and 'text' in i:
         text['title'] = i['title']
-      text['review'] = i['text']
-      reviews.append(text)
-
-    print(reviews)
-    return products,reviews
+        text['review'] = i['text']
+        temp.append(text)
+  reviews.append(temp)
+  return products, reviews
 
 
 
