@@ -113,8 +113,6 @@ if uploaded_file and selected_file != "None":
     st.write("Error: please select only one option")
 
 else:
-    st.write(type(uploaded_file))
-    st.write(type(selected_image))
 
     if selected_image is not None:
         # st.image(selected_image, caption="Uploaded Image", use_column_width=True)
@@ -143,9 +141,15 @@ else:
             # TODO
             products, reviews = WalmartReviews(label_query)
             # st.write(reviews)
+            log_results = {'Image_File': selected_file,
+                           'Logo_List': logo_list,
+                           'Label_List': label_list,
+                           'Marketplace': 'Walmart',
+                           'Products': products
+                           }
+            write_logs(str(log_results))
             for j,i in enumerate(products):
                 st.image(i, width=300)
-
 
                 # Learn More
                 st.write('Want to Learn More? Check below to generate a summary of product reviews:')
@@ -245,74 +249,50 @@ else:
             # TODO
             products, reviews = WalmartReviews(label_query)
 
-            for i in products:
-                st.image(i, width=300)
-
             # AWS CloudWatch Logging - TODO
             log_results = {'Image_File': filename,
-                            'Logo_List': logo_list,
-                            'Label_List': label_list,
-                            'Marketplace': 'Walmart',
-                            'Products': products
-                            }
+                           'Logo_List': logo_list,
+                           'Label_List': label_list,
+                           'Marketplace': 'Walmart',
+                           'Products': products
+                           }
             write_logs(str(log_results))
 
-            # Upload JSON Results file to S3
-            # Convert the dictionary to JSON
             json_str = json.dumps(log_results)
             # Upload the JSON file to S3
-            s3_client.put_object(Bucket=s3_bucket_name, Key='Results/' + filename.split('.')[0] + '.json', Body=json_str)
+            s3_client.put_object(Bucket=s3_bucket_name, Key='Results/' + filename.split('.')[0] + '.json',
+                                 Body=json_str)
 
             st.write(f"{filename.split('.')[0]}.json uploaded to S3")
 
+            for j,i in enumerate(products):
+                st.image(i, width=300)
+
+
+
+            # Upload JSON Results file to S3
+            # Convert the dictionary to JSON
+
+
             # Learn More
-            st.write('Want to Learn More? Check below to generate a summary of product reviews:')
-            learn_more = st.checkbox('Learn More?')
-            # Generate Summary of Reviews
-            if learn_more:
-                all_reviews = ""
-                # TODO: Generate Summary of reviews
-                st.title('Summary of Reviews')
-                for item in reviews:
-                    # check if the 'title' field exists in the current item
-                    st.text("")
-                    if 'title' in item:
-                        st.subheader(item['title'])
-                    # display the 'review' field
-                    st.write(item['review'])
-                    all_reviews += item['review']
+                st.write('Want to Learn More? Check below to generate a summary of product reviews:')
+                learn_more = st.checkbox('Learn More?', key = j)
+                # Generate Summary of Reviews
+                if learn_more:
+                    all_reviews = ""
+                    # TODO: Generate Summary of reviews
+                    st.title('Summary of Reviews')
+                    for item in reviews:
+                        # check if the 'title' field exists in the current item
+                        st.text("")
+                        # st.write(item)
+                        summary_prompt = "Summarize the below reviews into 2-3 sentences and suggest whether a user should buy the product:"
 
-                shoud_buy = st.checkbox('Should I buy this product?')
-                if shoud_buy:
-                    buy_decision = should_buy_product(all_reviews)
-                    st.write(buy_decision)
+                        completion = openai.ChatCompletion.create(
+                            model="gpt-3.5-turbo",
+                            messages=[{"role": "user", "content": summary_prompt + str(item)}],
+                            temperature=0.7
+                        )
 
-
-    
-
-                     
-
-
-
-
-
-        # # TESTING 
-        # path = 'Example_Images/patagonia_fleece.jpg'
-
-        # with io.open(path, 'rb') as image_file:
-        #     content = image_file.read()
-
-        # image = vision.Image(content=content)
-
-        # response = client.label_detection(image=image)
-        # labels = response.label_annotations
-        # print('Labels:')
-
-        # for label in labels:
-        #     print(label.description)
-
-        # if response.error.message:
-        #     raise Exception(
-        #         '{}\nFor more info on error messages, check: '
-        #         'https://cloud.google.com/apis/design/errors'.format(
-        #             response.error.message))
+                        chat_output = completion.choices[0].message.content.strip()
+                        st.write(chat_output)
