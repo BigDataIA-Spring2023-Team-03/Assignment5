@@ -13,7 +13,7 @@ def compare_score(image1_path, image2_path):
     The lower the score, the more contextually similar the two images are with a score of '0' being identical.
     '''
     url = "https://api.deepai.org/api/image-similarity"
-    headers = {"api-key": "d7b43115-5b69-4fff-bc91-3bc404b3f23a"}
+    headers = {"api-key": ""}
 
     files = {"image1": open(image1_path, 'rb'), "image2": open(image2_path, 'rb')}
 
