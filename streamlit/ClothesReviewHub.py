@@ -78,7 +78,7 @@ st.title('ClothesReviewHub')
 st.subheader('Three Upload Options: Take a Picture, Select Existing from S3, Upload an Image')
 
 # Take Picture Option
-link = 'http://localhost:8501/Camera_Image'
+link = 'http://52.202.105.109:8501/Camera_Image'
 
 st.markdown(f'To take a picture using your device, use this link: <a href={link}>Take Picture</a>', unsafe_allow_html=True)
 
