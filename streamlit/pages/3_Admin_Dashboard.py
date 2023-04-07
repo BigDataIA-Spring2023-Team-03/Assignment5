@@ -9,14 +9,6 @@ import pandas as pd
 from datetime import datetime, timedelta
 from decouple import config
 
-# DEV or PROD
-environment = 'PROD'
-if environment == 'DEV':
-    webserver = 'localhost:8080'
-elif environment == 'PROD':
-    webserver = 'airflow-airflow-webserver-1:8080'
-
-
 # AWS KEYS
 aws_access_key_id = config('aws_access_key_id')
 aws_secret_access_key = config('aws_secret_access_key')
