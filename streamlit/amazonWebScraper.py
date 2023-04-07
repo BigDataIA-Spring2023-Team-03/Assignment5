@@ -53,15 +53,14 @@ def WalmartReviews(query):
 
     search = GoogleSearch(params)
     results = search.get_dict()
-
-    print(results['overall_rating'])
     temp = []
-    for i in results['reviews']:
-      text = {}
-      if 'title' in i and 'text' in i:
-        text['title'] = i['title']
-        text['review'] = i['text']
-        temp.append(text)
+    if 'reviews' in results:
+      for i in results['reviews']:
+        text = {}
+        if 'title' in i and 'text' in i:
+          text['title'] = i['title']
+          text['review'] = i['text']
+          temp.append(text)
   reviews.append(temp)
   return products, reviews
 
