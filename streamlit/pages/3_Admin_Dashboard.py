@@ -47,7 +47,7 @@ log_group = 'assignment5-log-group'
 
 # Set the title of the app
 st.title("Admin Dashboard")
-st.write('This dashboard shows history of app.')
+st.write('This dashboard shows history of the app.')
 
 # Enter Password to Access Batch Functionality
 password = st.text_input("Enter Password:")
@@ -55,43 +55,45 @@ password = st.text_input("Enter Password:")
 if password != '':
     if password == 'damgadmin': 
         #############################################################################
-        # # CUSTOM QUESTION HISTORY FROM CLOUD WATCH
-        # query = """
-        # fields @timestamp, @message | filter @message like /Custom_Question/ | sort @timestamp desc | limit 25
-        # """
+        # HISTORY FROM CLOUD WATCH
+        query = """
+        fields @timestamp, @message | sort @timestamp desc | limit 25
+        """
 
-        # start_query_response = clientlogs.start_query(
-        #     logGroupName=log_group,
-        #     startTime=int((datetime.today() - timedelta(days=5)).timestamp()),
-        #     endTime=int(datetime.now().timestamp()),
-        #     queryString=query,
-        # )
-        # # start_query_response
+        start_query_response = clientlogs.start_query(
+            logGroupName=log_group,
+            startTime=int((datetime.today() - timedelta(days=5)).timestamp()),
+            endTime=int(datetime.now().timestamp()),
+            queryString=query,
+        )
+        # start_query_response
 
-        # query_id = start_query_response['queryId']
+        query_id = start_query_response['queryId']
 
-        # response = None
+        response = None
 
-        # while response == None or response['status'] == 'Running':
-        #     print('Waiting for query to complete ...')
-        #     time.sleep(1)
-        #     response = clientlogs.get_query_results(
-        #         queryId=query_id
-        #     )
+        while response == None or response['status'] == 'Running':
+            print('Waiting for query to complete ...')
+            time.sleep(1)
+            response = clientlogs.get_query_results(
+                queryId=query_id
+            )
 
-        # data = response['results']
+        data = response['results']
 
-        # message_records = []
-        # for record in data:
-        #     # convert dictionary string to dictionary
-        #     # st.write(type(eval(record[1]['value'])))
-        #     record_dict = eval(record[1]['value'])
-        #     message_records.append(record_dict)
+        message_records = []
+        for record in data:
+            # convert dictionary string to dictionary
+            record_dict = eval(record[1]['value'])
+            # drop duplicate rows based on all columns
+            if record_dict not in message_records:
+                message_records.append(record_dict)
 
-        # # message_records
-        # log_df = pd.DataFrame(message_records)
-        # st.header('CloudWatch Records of Image History (25 Most Recent):')
-        # st.write(log_df.head(25))
+        # message_records
+        log_df = pd.DataFrame(message_records)
+        st.header('CloudWatch Records of Image History (25 Most Recent):')
+
+        st.write(log_df.head(25))
 
 
         # ######################################################################################################
@@ -104,7 +106,7 @@ if password != '':
 
         selected_file = st.selectbox("Get Image and Results from Previous run:", ["None"] + s3_files)
         # st.write(selected_file) 
-        selected_file = 'jared_sweater_06_04_23.jpg'
+        # selected_file = 'jared_sweater_06_04_23.jpg'
 
         if selected_file:
             # Check if file has been run through the app
@@ -128,7 +130,7 @@ if password != '':
             except ClientError as e:
                 if e.response['Error']['Code'] == "404":
                     # The key does not exist.
-                    st.write(f"Image, {selected_file} doesn't have a results file!")
+                    st.error(f"{selected_file} doesn't have a results file! Run it through the ClothesReviewHub!")
                 elif e.response['Error']['Code'] == 403:
                     # Unauthorized, including invalid bucket
                     st.write('Unauthorized, including invalid bucket')

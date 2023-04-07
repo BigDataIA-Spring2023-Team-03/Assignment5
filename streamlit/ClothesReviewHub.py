@@ -8,12 +8,13 @@ import openai
 import io
 from amazonWebScraper import WalmartReviews
 from ProductBuy import should_buy_product
+from Logging.aws_logging import write_logs
+import json
 
 # AWS KEYS
 aws_access_key_id = config('aws_access_key_id')
 aws_secret_access_key = config('aws_secret_access_key')
-# log_aws_access_key_id = config('log_aws_access_key_id')
-# log_aws_secret_access_key = config('log_aws_secret_access_key')
+
 # Google Credentials 
 credentials = service_account.Credentials.from_service_account_file('damg7245-team3-assignment5-b0ba9f72c8a3.json')
 
@@ -34,13 +35,9 @@ def detect_labels_logos(file):
     """Detects labels in the file."""
     client = vision.ImageAnnotatorClient(credentials=credentials)
 
-    # with io.open(file, 'rb') as image_file:
-    #     content = image_file.read()
     content = file.read()
-    # st.write(type(content))
     image = vision.Image(content=content)
-    # st.write(type(image))
-    # get_gender(image)
+
     # Labels
     response = client.label_detection(image=image)
     labels = response.label_annotations
@@ -250,6 +247,23 @@ else:
 
             for i in products:
                 st.image(i, width=300)
+
+            # AWS CloudWatch Logging - TODO
+            log_results = {'Image_File': filename,
+                            'Logo_List': logo_list,
+                            'Label_List': label_list,
+                            'Marketplace': 'Walmart',
+                            'Products': products
+                            }
+            write_logs(str(log_results))
+
+            # Upload JSON Results file to S3
+            # Convert the dictionary to JSON
+            json_str = json.dumps(log_results)
+            # Upload the JSON file to S3
+            s3_client.put_object(Bucket=s3_bucket_name, Key='Results/' + filename.split('.')[0] + '.json', Body=json_str)
+
+            st.write(f"{filename.split('.')[0]}.json uploaded to S3")
 
             # Learn More
             st.write('Want to Learn More? Check below to generate a summary of product reviews:')
