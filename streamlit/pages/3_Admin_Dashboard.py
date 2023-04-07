@@ -106,7 +106,7 @@ if password != '':
 
         selected_file = st.selectbox("Get Image and Results from Previous run:", ["None"] + s3_files)
         # st.write(selected_file) 
-        selected_file = 'jared_sweater_06_04_23.jpg'
+        # selected_file = 'jared_sweater_06_04_23.jpg'
 
         if selected_file:
             # Check if file has been run through the app
@@ -130,7 +130,7 @@ if password != '':
             except ClientError as e:
                 if e.response['Error']['Code'] == "404":
                     # The key does not exist.
-                    st.write(f"Image, {selected_file} doesn't have a results file!")
+                    st.error(f"{selected_file} doesn't have a results file! Run it through the ClothesReviewHub!")
                 elif e.response['Error']['Code'] == 403:
                     # Unauthorized, including invalid bucket
                     st.write('Unauthorized, including invalid bucket')
