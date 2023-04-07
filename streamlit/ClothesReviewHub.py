@@ -6,6 +6,8 @@ import os
 from google.oauth2 import service_account
 from decouple import config
 import boto3
+from amazonWebScraper import WalmartReviews
+from ProductBuy import should_buy_product
 
 # AWS KEYS
 aws_access_key_id = config('aws_access_key_id')
@@ -144,25 +146,54 @@ else:
         label_list, logo_list = detect_labels_logos(image_data)
 
         st.write(f'Label List: {label_list}')
-        st.write(f'Logo List: {logo_list}')
 
+        label_query = ""
+        for i in label_list:
+            label_query += i
+            label_query += " "
+
+        st.write("")
+        st.write(label_query)
+        st.write(f'Logo List: {logo_list}')
 
         # Search for Similar Products
         st.subheader('Select Marketplace to Search for Similar Products:')
-        walmart = st.checkbox('Walmart')
-        amazon = st.checkbox('Amazon - (Deprecated)')
+        walmart = st.checkbox('Get Walmart Reviews')
+        # amazon = st.checkbox('Amazon - (Deprecated)')
 
         if walmart:
             # TODO
-            st.write('Link to result, image')
+            products, reviews = WalmartReviews(label_query)
+
+            for i in products:
+                st.image(i, width=300)
 
             # Learn More
             st.write('Want to Learn More? Check below to generate a summary of product reviews:')
             learn_more = st.checkbox('Learn More?')
             # Generate Summary of Reviews
             if learn_more:
+                all_reviews = ""
                 # TODO: Generate Summary of reviews
-                st.subheader('Summary of Reviews')
+                st.title('Summary of Reviews')
+                for item in reviews:
+                    # check if the 'title' field exists in the current item
+                    st.text("")
+                    if 'title' in item:
+                        st.subheader(item['title'])
+                    # display the 'review' field
+                    st.write(item['review'])
+                    all_reviews += item['review']
+
+                shoud_buy = st.checkbox('Should I buy this product?')
+                if shoud_buy:
+                    buy_decision = should_buy_product(all_reviews)
+                    st.write(buy_decision)
+
+
+    
+
+                     
 
 
 
