@@ -6,7 +6,7 @@ Initial Presentation: https://docs.google.com/presentation/d/1xieFRIxBQXawJvA3Ik
 Google Colab: https://docs.google.com/document/d/1mMz2OG9YK_P8xhHtDFceut6i6YMmXcHIEY_TfnvP36k/edit?usp=sharing
 
 # Live Application Link
-[http://52.202.105.109:8501](http://44.214.57.19:8501)
+[http://44.214.57.19:8501](http://44.214.57.19:8501)
 
 # CodeLab Documentation
 https://codelabs-preview.appspot.com/?file_id=1mMz2OG9YK_P8xhHtDFceut6i6YMmXcHIEY_TfnvP36k#0
